@@ -22,28 +22,19 @@ jobs:
       with:
         node-version: '18'
     
-    - name: Install dependencies
+    - name: Install SonarQube Scanner
       run: |
-        if [ -f package.json ]; then
-          npm install
-        fi
+        npm install -g sonarqube-scanner
     
-    - name: Run tests (if available)
-      run: |
-        if [ -f package.json ] && grep -q '"test"' package.json; then
-          npm test
-        else
-          echo "No tests found, skipping"
-        fi
-    
-    - name: SonarQube Scan
-      uses: sonarqube-quality-gate-action@master
+    - name: Run SonarQube Analysis
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.SONARQUBE_TOKEN }}
         SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-      with:
-        args: >
-          -Dsonar.projectKey=Sample-ReactJS
-          -Dsonar.sources=.
-          -Dsonar.exclusions=node_modules/**,coverage/**,.git/**
+      run: |
+        sonar-scanner \
+          -Dsonar.projectKey=Sample-ReactJS \
+          -Dsonar.sources=. \
+          -Dsonar.exclusions=node_modules/**,coverage/**,.git/**,.github/** \
+          -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
+          -Dsonar.login=${{ secrets.SONARQUBE_TOKEN }}
